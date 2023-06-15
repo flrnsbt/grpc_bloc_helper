@@ -139,7 +139,7 @@ class ListStreamTest extends StatelessWidget {
         return Center(
             child: TextButton(
                 onPressed: () {
-                  context.read<PaginatedTestBloc>().get();
+                  context.read<PaginatedTestBloc>().get(null);
                 },
                 child: const Text('Get data')));
       }

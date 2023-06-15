@@ -15,16 +15,16 @@ export 'src/grpc_state.dart';
 export 'src/extensions.dart';
 // export 'src/empty.dart';
 
-extension GrpcPaginatedExtension
-    on GrpcBaseBloc<GrpcPaginatedEvent<void>, dynamic> {
+extension GrpcPaginatedExtension<E>
+    on GrpcBaseBloc<GrpcPaginatedEvent<E>, dynamic> {
   /// fetches data from the server starting from [offset]
-  void fetchFrom(int offset) {
-    fetch(GrpcPaginatedEvent(offset, null));
+  void fetchFrom(int offset, E event) {
+    fetch(GrpcPaginatedEvent(offset, event));
   }
 
   /// fetches data from the server starting from offset 0
-  void get() {
-    fetch(const GrpcPaginatedEvent(0, null));
+  void get(E event) {
+    fetch(GrpcPaginatedEvent(0, event));
   }
 }
 
