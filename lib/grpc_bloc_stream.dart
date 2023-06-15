@@ -215,7 +215,7 @@ extension ConnectionStatusExtension on ConnectionStatus {
 
 class GrpcPaginatedEvent<E> {
   final int offset;
-  final E? event;
+  final E event;
 
   const GrpcPaginatedEvent(this.offset, this.event);
 }
