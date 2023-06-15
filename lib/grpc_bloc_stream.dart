@@ -14,7 +14,7 @@ import 'src/grpc_state.dart';
 export 'src/connection_status.dart';
 export 'src/grpc_state.dart';
 export 'src/extensions.dart';
-export 'src/empty.dart';
+// export 'src/empty.dart';
 
 extension GrpcPaginatedExtension
     on GrpcBaseBloc<GrpcPaginatedEvent<Empty>, dynamic> {
