@@ -60,11 +60,11 @@ abstract class GrpcBaseBloc<E, T> extends Bloc<GrpcEvent<E>, GrpcState<T>> {
     return _event == null;
   }
 
-  void refresh() {
+  void refresh([bool flushData = true]) {
     if (isEventNull) {
       throw Exception('event is null');
     }
-    fetch(_event as E, true);
+    fetch(_event as E, flushData);
   }
 
   @override
