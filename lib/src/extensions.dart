@@ -2,17 +2,17 @@ import 'package:grpc/grpc.dart';
 import 'package:grpc_bloc_helper/src/grpc_bloc_base.dart';
 
 import 'connection_status.dart';
-import 'empty.dart';
+// import 'empty.dart';
 import 'grpc_state.dart';
 
 ///
 /// Extensions
 ///
-extension GrpcBlocExtension on GrpcBaseBloc<Empty, dynamic> {
+extension GrpcBlocExtension on GrpcBaseBloc<void, dynamic> {
   /// method to fetch data when event is empty
   /// Simplifies the code
   void fetchNoParam() {
-    fetch(Empty());
+    fetch(null);
   }
 }
 
