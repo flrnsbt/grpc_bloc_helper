@@ -13,7 +13,6 @@ import 'src/grpc_state.dart';
 
 export 'src/connection_status.dart';
 export 'src/grpc_state.dart';
-export 'src/empty.dart';
 export 'src/extensions.dart';
 
 extension GrpcPaginatedExtension

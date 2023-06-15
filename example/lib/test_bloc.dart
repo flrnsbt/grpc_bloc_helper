@@ -1,5 +1,6 @@
 import 'package:grpc_bloc_helper/grpc_bloc_stream.dart';
 import 'package:grpc_bloc_helper/grpc_bloc_unary.dart';
+import 'package:grpc_bloc_helper/protobuf_empty.dart';
 
 class PaginatedTestBloc extends GrpcListStreamBloc<Empty, int> {
   @override
