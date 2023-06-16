@@ -75,12 +75,12 @@ abstract class GrpcBaseBloc<E, T> extends Bloc<GrpcEvent<E>, GrpcState<T>> {
     super.add(event);
   }
 
-  FutureOr<void> waitForAsync(ConnectionStatus status,
+  FutureOr<void> waitForAsync(bool Function(GrpcState<T>) predicate,
       [Duration? timeout = const Duration(seconds: 60)]) async {
-    if (state.connectionStatus == status) {
+    if (predicate(state)) {
       return;
     }
-    final s = stream.firstWhere((state) => state.connectionStatus == status);
+    final s = stream.firstWhere(predicate);
     if (timeout != null) {
       await s.timeout(timeout);
     } else {

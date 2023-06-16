@@ -61,7 +61,7 @@ abstract class GrpcUnaryBloc<E, T> extends GrpcBaseBloc<E, T> {
 
   /// Add data to the current state
   Future<void> addData(T data) async {
-    await waitForAsync(ConnectionStatus.finished);
+    await waitForAsync((s) => s.connectionStatus.isFinishedOrIdle());
     emit(state.copyWith(data: data, status: ConnectionStatus.finished));
   }
 
