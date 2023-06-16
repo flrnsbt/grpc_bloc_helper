@@ -59,7 +59,12 @@ abstract class GrpcListStreamBloc<E, T>
   /// do not call this method nor override it
   List<T> merge(List<T>? value, T newValue) {
     final v = List<T>.from(value ?? []);
-    v.add(newValue);
+    final indexOf = v.indexOf(newValue);
+    if (indexOf != -1) {
+      v[indexOf] = newValue;
+    } else {
+      v.add(newValue);
+    }
     return v;
   }
 
