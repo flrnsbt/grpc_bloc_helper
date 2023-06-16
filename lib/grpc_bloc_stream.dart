@@ -88,7 +88,7 @@ abstract class GrpcListStreamBloc<E, T>
   }
 
   @override
-  void fetch(GrpcPaginatedEvent<E> event, [bool? refresh = false]) {
+  void fetch(GrpcPaginatedEvent<E> event, [bool? refresh]) {
     if (refresh == true) {
       event = GrpcPaginatedEvent(0, event.event);
     } else {
@@ -97,9 +97,10 @@ abstract class GrpcListStreamBloc<E, T>
           refresh = true;
         }
       }
-      refresh = false;
     }
-    super.fetch(event, refresh!);
+    refresh ??= false;
+
+    super.fetch(event, refresh);
   }
 }
 
