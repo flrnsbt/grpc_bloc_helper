@@ -59,7 +59,7 @@ abstract class GrpcListStreamBloc<E, T>
   /// do not call this method nor override it
   List<T> merge(List<T>? value, T newValue) {
     final v = List<T>.from(value ?? []);
-    final indexOf = v.indexOf(newValue);
+    final indexOf = v.indexWhere((element) => equals(element, newValue));
     if (indexOf != -1) {
       v[indexOf] = newValue;
     } else {
@@ -67,6 +67,8 @@ abstract class GrpcListStreamBloc<E, T>
     }
     return v;
   }
+
+  bool equals(T a, T b) => a == b;
 
   /// if [force] is true, it will fetch data from the server even
   /// if the previous offset is greater than the current data length
