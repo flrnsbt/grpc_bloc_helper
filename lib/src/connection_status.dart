@@ -6,6 +6,8 @@ enum ConnectionStatus {
   active,
   finished;
 
+  operator |(ConnectionStatus other) => index | other.index;
+
   bool isLoading() => this == ConnectionStatus.loading;
   bool isFinished() => this == ConnectionStatus.finished;
   bool isIdle() => this == ConnectionStatus.idle;
