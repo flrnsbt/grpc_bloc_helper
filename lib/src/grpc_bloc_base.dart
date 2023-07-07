@@ -3,7 +3,6 @@ import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:grpc_bloc_helper/src/connection_status.dart';
 import 'package:grpc_bloc_helper/src/grpc_state.dart';
 
 import 'empty.dart';
@@ -28,6 +27,12 @@ abstract class GrpcBaseBloc<E, T> extends Bloc<GrpcEvent<E>, GrpcState<T>> {
     if (E == Empty) {
       _event = Empty() as E;
     }
+  }
+
+  /// Be careful when overriding this method, this could lead to unexpected
+  /// behavior
+  void changeEvent(E event) {
+    _event = event;
   }
 
   @override
