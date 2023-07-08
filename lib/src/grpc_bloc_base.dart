@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grpc_bloc_helper/src/grpc_state.dart';
 
+import '../grpc_bloc_helper.dart';
 import 'empty.dart';
 
 /// DO NOT USE THIS
@@ -38,7 +39,8 @@ abstract class GrpcBaseBloc<E, T> extends Bloc<GrpcEvent<E>, GrpcState<T>> {
   @override
   void onChange(Change<GrpcState<T>> change) {
     super.onChange(change);
-    if (change.nextState.data != change.currentState.data) {
+    if (change.nextState.data != change.currentState.data &&
+        GrpcBlocHelper.logActivated) {
       log('${change.nextState.data}',
           name: '$runtimeType', time: DateTime.now());
     }
@@ -48,7 +50,9 @@ abstract class GrpcBaseBloc<E, T> extends Bloc<GrpcEvent<E>, GrpcState<T>> {
   void onEvent(GrpcEvent<E> event) {
     super.onEvent(event);
     _event = event.event;
-    log('$event', name: '$runtimeType', time: DateTime.now());
+    if (GrpcBlocHelper.logActivated) {
+      log('$event', name: '$runtimeType', time: DateTime.now());
+    }
   }
 
   E? get lastEvent => _event;
