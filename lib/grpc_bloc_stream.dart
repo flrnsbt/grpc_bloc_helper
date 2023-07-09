@@ -263,6 +263,7 @@ abstract class GrpcStreamBloc<E, K, T> extends GrpcBaseBloc<E, T> {
     super.add(event);
   }
 
+  /// use this method to add data, if the last event is null, an exception will be thrown
   void addData(K data) {
     if (lastEvent == null) {
       throw Exception('Cannot add data if lastEvent is null');
