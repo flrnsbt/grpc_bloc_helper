@@ -96,9 +96,6 @@ abstract class GrpcBaseBloc<E, T> extends Bloc<GrpcEvent<E>, GrpcState<T>> {
   ///
   /// [flushData] is used to clear the previous data before fetching the new one
   void refresh([bool flushData = true]) {
-    if (isEventNull) {
-      throw Exception('event is null');
-    }
     fetch(_event as E, flushData);
   }
 
