@@ -1,4 +1,4 @@
-extension CastExtension on dynamic {
+extension CastExtension on Object? {
   T? tryCast<T>() {
     if (this is T) {
       return this as T;

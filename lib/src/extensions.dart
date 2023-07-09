@@ -31,22 +31,22 @@ extension GprcErrorExtension on GrpcError {
   }
 }
 
-extension GrpcPaginatedExtension
-    on GrpcBaseBloc<GrpcPaginatedEvent<void>, dynamic> {
-  /// fetches data from the server starting from [offset]
-  /// for empty events, it will use the [GrpcBlocEmptyMixin.generateEmptyEvent] method
-  void fetchFrom(int offset) {
-    fetch(GrpcPaginatedEvent(offset, null));
-  }
+// extension GrpcPaginatedExtension
+//     on GrpcBaseBloc<GrpcPaginatedEvent<void>, dynamic> {
+//   /// fetches data from the server starting from [offset]
+//   /// for empty events, it will use the [GrpcBlocEmptyMixin.generateEmptyEvent] method
+//   void fetchFrom(int offset) {
+//     fetch(GrpcPaginatedEvent(offset, null));
+//   }
 
-  /// fetches data from the server starting from offset 0
-  void fetchFromZero() {
-    fetchFrom(0);
-  }
-}
+//   /// fetches data from the server starting from offset 0
+//   void fetchFromZero() {
+//     fetchFrom(0);
+//   }
+// }
 
-extension GrpcBaseBlocExtension on GrpcBaseBloc<void, dynamic> {
-  void fetchNoParam() {
-    fetch(null);
-  }
-}
+// extension GrpcBaseBlocExtension on GrpcBaseBloc<void, dynamic> {
+//   void fetchNoParam() {
+//     fetch(null);
+//   }
+// }

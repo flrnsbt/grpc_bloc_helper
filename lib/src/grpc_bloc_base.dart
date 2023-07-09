@@ -17,8 +17,6 @@ class GrpcEvent<E> {
   final E event;
   final bool refresh;
 
-  static const GrpcEvent<void> empty = GrpcEvent<void>(null, false);
-
   const GrpcEvent(this.event, this.refresh);
 
   @override
@@ -76,8 +74,7 @@ abstract class GrpcBaseBloc<E, T> extends Bloc<GrpcEvent<E>, GrpcState<T>> {
     }
   }
 
-  E? get lastEvent =>
-      _event ?? GrpcBlocHelper.globalEmptyMessageGenerator?.call().tryCast<E>();
+  E? get lastEvent => _event ?? GrpcBlocHelper.emptyMessage<E>();
 
   E? _event;
 

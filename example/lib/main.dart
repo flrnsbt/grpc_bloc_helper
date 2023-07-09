@@ -78,7 +78,7 @@ class NormalTest extends StatelessWidget {
           return Center(
               child: TextButton(
                   onPressed: () {
-                    context.read<NormalTestBloc>().fetchNoParam();
+                    context.read<NormalTestBloc>().fetch(Empty());
                   },
                   child: const Text('Get data')));
         }
@@ -149,7 +149,9 @@ class ListStreamTest extends StatelessWidget {
         return Center(
             child: TextButton(
                 onPressed: () {
-                  context.read<PaginatedTestBloc>().fetchFromZero();
+                  context
+                      .read<PaginatedTestBloc>()
+                      .fetch(GrpcPaginatedEvent(0, Empty()));
                 },
                 child: const Text('Get data')));
       }

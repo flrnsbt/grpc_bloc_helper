@@ -1,4 +1,6 @@
-class GrpcBlocHelper<E> {
+import 'package:grpc_bloc_helper/src/utils.dart';
+
+class GrpcBlocHelper {
   static bool get isTestMode => instance._isTestMode;
 
   final bool _isTestMode;
@@ -12,6 +14,9 @@ class GrpcBlocHelper<E> {
   static EmptyMessageGenerator? get globalEmptyMessageGenerator =>
       instance._emptyGenerator;
 
+  static E? emptyMessage<E>() =>
+      CastExtension(_instance?._emptyGenerator?.call()).tryCast<E>();
+
   static bool get initialized => _instance != null;
 
   static GrpcBlocHelper? _instance;
@@ -21,12 +26,10 @@ class GrpcBlocHelper<E> {
     return _instance ??= const GrpcBlocHelper._();
   }
 
-  static Type? get emptyType => instance._emptyGenerator?.call()?.runtimeType;
-
   const GrpcBlocHelper._(
       {bool isTestMode = false,
       bool log = true,
-      EmptyMessageGenerator<E>? emptyGenerator})
+      EmptyMessageGenerator? emptyGenerator})
       : _isTestMode = isTestMode,
         _log = log,
         _emptyGenerator = emptyGenerator;
@@ -35,7 +38,7 @@ class GrpcBlocHelper<E> {
       {bool testMode = false,
       bool log = true,
       EmptyMessageGenerator<E>? emptyGenerator}) {
-    _instance ??= GrpcBlocHelper<E>._(
+    _instance ??= GrpcBlocHelper._(
         isTestMode: testMode, log: log, emptyGenerator: emptyGenerator);
   }
 }
