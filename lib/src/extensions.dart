@@ -19,18 +19,22 @@ extension GrpcBlocExtension on GrpcBaseBloc<Empty, dynamic> {
 extension GrpcStateExtension<T> on GrpcState<T> {
   /// I'm using an extension to define copyWith instead of defining it in the class
   /// to allow extended classes to use their own copyWith method
-  /// (passing the appropriate parameters)
+  ///
+  /// [forceStateChange] is used to force the timestamp to be updated, which will
+  /// cause the UI to rebuild even though the state is the same (data passed in the
+  /// copyWith method is the same as the data in the previous state)
+  ///
   // ignore: avoid_shadowing_type_parameters
   GrpcState<T> copyWith<T>(
       {ConnectionStatus? status,
-      int? timestamp,
       T? data,
       Object? error,
-      bool? skip}) {
+      bool? skip,
+      bool forceStateChange = true}) {
     return GrpcState<T>(
         connectionStatus: status ?? connectionStatus,
         data: (data ?? this.data) as T?,
-        timestamp: timestamp ?? this.timestamp,
+        timestamp: forceStateChange ? null : timestamp,
         error: error ?? this.error);
   }
 }

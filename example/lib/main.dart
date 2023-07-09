@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grpc_bloc_helper/grpc_bloc_helper.dart';
 import 'package:grpc_bloc_helper/grpc_bloc_stream.dart';
+import 'package:grpc_bloc_helper/grpc_bloc_unary.dart';
 
 void main() {
   GrpcBlocHelper.setTestMode();
@@ -87,6 +88,13 @@ class NormalTest extends StatelessWidget {
             appBar: AppBar(
               title: const Text('Normal Test'),
               actions: [
+                TextButton(
+                    onPressed: () {
+                      // context.read<NormalTestBloc>().updateData(1, 99);
+                      state.updateFromIndex(0, 99);
+                    },
+                    child: const Text('Change data 1 to 99',
+                        style: TextStyle(color: Colors.white))),
                 TextButton(
                     onPressed: () {
                       context.read<NormalTestBloc>().refresh();
@@ -176,6 +184,13 @@ class ListStreamTest extends StatelessWidget {
         appBar: AppBar(
           title: const Text('List Stream Test'),
           actions: [
+            TextButton(
+                onPressed: () {
+                  // context.read<PaginatedTestBloc>().updateData(1, 99);
+                  state.updateFirst(1, 99);
+                },
+                child: const Text('Change data 1 to 99',
+                    style: TextStyle(color: Colors.white))),
             TextButton(
                 onPressed: () {
                   context.read<PaginatedTestBloc>().refresh();

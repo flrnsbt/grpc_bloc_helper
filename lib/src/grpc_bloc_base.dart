@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grpc_bloc_helper/src/grpc_state.dart';
 
@@ -21,6 +20,17 @@ class GrpcEvent<E> {
 
   @override
   String toString() => 'Unary Event: ${event.runtimeType} | Data: $event';
+}
+
+/// Event to update the data
+class UpdateEvent<E, T> extends GrpcEvent<E> {
+  /// Data to update
+  ///
+  /// This is optional
+  ///
+  /// If this is null, trigger a [reload]
+  final T? data;
+  const UpdateEvent(E event, [this.data]) : super(event, false);
 }
 
 abstract class GrpcBaseBloc<E, T> extends Bloc<GrpcEvent<E>, GrpcState<T>> {
@@ -43,6 +53,18 @@ abstract class GrpcBaseBloc<E, T> extends Bloc<GrpcEvent<E>, GrpcState<T>> {
         GrpcBlocHelper.logActivated) {
       log('${change.nextState.data}',
           name: '$runtimeType', time: DateTime.now());
+    }
+  }
+
+  /// [reload] is used to reload the data, generally to force a rebuild
+  ///
+  /// Unlike [refresh], [reload] won't get the data from the server
+  ///
+  /// It is just emiting the same state with the same data, but a different
+  /// timestamp
+  void reload() {
+    if (lastEvent != null) {
+      add(UpdateEvent(lastEvent as E));
     }
   }
 
@@ -76,14 +98,6 @@ abstract class GrpcBaseBloc<E, T> extends Bloc<GrpcEvent<E>, GrpcState<T>> {
     fetch(_event as E, flushData);
   }
 
-  @override
-  @visibleForTesting
-
-  /// do not use this method, use the defined methods (get, append)
-  void add(GrpcEvent<E> event) {
-    super.add(event);
-  }
-
   FutureOr<void> waitForAsync(bool Function(GrpcState<T>) predicate,
       [Duration? timeout = const Duration(seconds: 60)]) async {
     if (predicate(state)) {
@@ -95,6 +109,13 @@ abstract class GrpcBaseBloc<E, T> extends Bloc<GrpcEvent<E>, GrpcState<T>> {
     } else {
       await s;
     }
+  }
+
+  @override
+  void emit(GrpcState<T> state) {
+    attachBloc<E, T>(state, this);
+    // ignore: invalid_use_of_visible_for_testing_member
+    super.emit(state);
   }
 
   /// when refresh is set to true, the previous data will be cleared

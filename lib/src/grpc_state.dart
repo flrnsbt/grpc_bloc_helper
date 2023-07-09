@@ -1,5 +1,8 @@
+// ignore_for_file: must_be_immutable
+
 import 'package:equatable/equatable.dart';
-import 'connection_status.dart';
+import 'package:grpc_bloc_helper/grpc_bloc_stream.dart';
+import 'package:grpc_bloc_helper/src/grpc_bloc_base.dart';
 
 ///
 /// GRPC STATE
@@ -11,13 +14,19 @@ import 'connection_status.dart';
 /// [timestamp] is the time the state was created
 /// [connectionStatus] is the status of the grpc call
 class GrpcState<T> extends Equatable {
+  GrpcBaseBloc<dynamic, T>? _bloc;
+
+  void _attachBloc(GrpcBaseBloc<dynamic, T> bloc) {
+    _bloc = bloc;
+  }
+
   GrpcState(
       {this.connectionStatus = ConnectionStatus.idle,
       T? data,
       this.error,
       int? timestamp})
       : _data = data,
-        timestamp = timestamp ?? DateTime.now().millisecondsSinceEpoch;
+        timestamp = timestamp ?? _getTimestamp();
 
   factory GrpcState.init() => GrpcState();
 
@@ -48,4 +57,42 @@ class GrpcState<T> extends Equatable {
 
   @override
   List<Object?> get props => [connectionStatus, _data, error, timestamp];
+
+  static int _getTimestamp() {
+    return DateTime.now().millisecondsSinceEpoch;
+  }
+
+  void _reload() {
+    assert(_bloc != null, 'No GrpcBaseBloc was attached to this state');
+    _bloc!.reload();
+  }
+}
+
+extension GrpcStateListExtension<T> on GrpcState<List<T>> {
+  void updateFirst(T data, T newData) {
+    if (connectionStatus.isLoading() || connectionStatus.isActive()) {
+      return;
+    }
+    final index = this.data!.indexOf(data);
+    if (index != -1) {
+      final list = this.data!;
+      list[index] = newData;
+      _reload();
+    }
+  }
+
+  void updateFromIndex(int index, T newData) {
+    if (connectionStatus.isLoading() || connectionStatus.isActive()) {
+      return;
+    }
+    if (index != -1) {
+      final list = data!;
+      list[index] = newData;
+      _reload();
+    }
+  }
+}
+
+void attachBloc<E, T>(GrpcState<T> grpcState, GrpcBaseBloc<E, T> bloc) {
+  grpcState._attachBloc(bloc);
 }

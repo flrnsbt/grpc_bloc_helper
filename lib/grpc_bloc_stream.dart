@@ -102,6 +102,31 @@ abstract class GrpcListStreamBloc<E, T>
 
     super.fetch(event, refresh);
   }
+
+  @override
+  @visibleForTesting
+
+  /// do not use this method, use the defined methods ([fetch], [addData])
+  void add(GrpcEvent<GrpcPaginatedEvent<E>> event) {
+    super.add(event);
+  }
+
+  void updateData(T data, T newData, [bool appendIfAbsent = false]) {
+    if (state.isFinished() || state.isIdle()) {
+      final dataList = List<T>.from(state.data ?? []);
+      final indexOf = dataList.indexWhere((element) => equals(element, data));
+      if (indexOf != -1) {
+        dataList[indexOf] = newData;
+      } else {
+        if (appendIfAbsent) {
+          dataList.add(newData);
+        } else {
+          return;
+        }
+      }
+      addData(dataList);
+    }
+  }
 }
 
 extension _StreamExtension<T> on Stream<T> {
@@ -113,22 +138,22 @@ extension _StreamExtension<T> on Stream<T> {
   }
 }
 
-/// GrpcStreamBloc expects data from the server of type [T]
+/// GrpcStreamBloc expects data from the server of type [K]
 ///
 /// [E] is the type of the event that will be sent to the grpc server
 ///
-/// The data handled in the state will be of type [K] and must be defined by using
+/// The data handled in the state will be of type [T] and must be defined by using
 /// the method [merge], it allows to customize the way the data is handled
 ///
 /// For example by collecting each stream data in a list (see [GrpcListStreamBloc])
-abstract class GrpcStreamBloc<E, T, K> extends GrpcBaseBloc<E, K> {
+abstract class GrpcStreamBloc<E, K, T> extends GrpcBaseBloc<E, T> {
   int? get limit => null;
 
   Completer<void>? _completer;
   FutureOr<void> _fetch(
     E event,
     bool refresh,
-    Emitter<GrpcState<K>> emit,
+    Emitter<GrpcState<T>> emit,
   ) async {
     _subscription?.cancel();
     if (refresh) {
@@ -141,7 +166,7 @@ abstract class GrpcStreamBloc<E, T, K> extends GrpcBaseBloc<E, K> {
       final stream =
           (GrpcBlocHelper.isTestMode ? testValue(event) : dataFromServer(event))
               .takeNull(limit);
-      K? data = state.data;
+      T? data = state.data;
 
       _subscription = stream.listen(
         (newData) {
@@ -171,10 +196,24 @@ abstract class GrpcStreamBloc<E, T, K> extends GrpcBaseBloc<E, K> {
 
   GrpcStreamBloc() {
     on<GrpcEvent<E>>((e, emit) async {
-      if (state.isLoading()) {
-        return;
+      if (e is UpdateEvent) {
+        if (state.isLoading() || state.isActive()) {
+          return;
+        }
+        if (e.event != lastEvent) {
+          return;
+        }
+        var data = state.data;
+        final eventData = (e as UpdateEvent<dynamic, dynamic>).data;
+        if (eventData != null) {
+          data = merge(data, eventData);
+        }
+        emit(state.copyWith(status: ConnectionStatus.finished, data: data));
+      } else {
+        /// _fetch async method is finished when the stream is done or an error is thrown
+        /// meaning that the connection status is not in loading or active state anymore
+        await _fetch(e.event, e.refresh, emit);
       }
-      await _fetch(e.event, e.refresh, emit);
     }, transformer: transformer);
   }
 
@@ -185,7 +224,7 @@ abstract class GrpcStreamBloc<E, T, K> extends GrpcBaseBloc<E, K> {
           Stream<GrpcEvent<E>>, Stream<GrpcEvent<E>> Function(GrpcEvent<E>))
       get transformer => sequential();
 
-  StreamSubscription<T?>? _subscription;
+  StreamSubscription<K?>? _subscription;
 
   @override
   Future<void> close() {
@@ -198,7 +237,7 @@ abstract class GrpcStreamBloc<E, T, K> extends GrpcBaseBloc<E, K> {
 
   /// override this method to test the Bloc by returning
   /// mock data
-  Stream<T?> testValue(E event) async* {
+  Stream<K?> testValue(E event) async* {
     await Future.delayed(const Duration(seconds: 1));
     yield null;
   }
@@ -207,7 +246,7 @@ abstract class GrpcStreamBloc<E, T, K> extends GrpcBaseBloc<E, K> {
   @visibleForTesting
 
   /// override this method to pass the data from the server
-  Stream<T?> dataFromServer(E event);
+  Stream<K?> dataFromServer(E event);
 
   @protected
   @visibleForTesting
@@ -216,7 +255,22 @@ abstract class GrpcStreamBloc<E, T, K> extends GrpcBaseBloc<E, K> {
   ///
   /// This method needs to be overriden to tell how to merge the new data
   /// with the old data
-  K merge(K? value, T newValue);
+  T merge(T? value, K newValue);
+
+  @override
+  @visibleForTesting
+
+  /// do not use this method, use the defined methods ([fetch], [addData])
+  void add(GrpcEvent<E> event) {
+    super.add(event);
+  }
+
+  void addData(T data) {
+    if (lastEvent == null) {
+      throw Exception('Cannot add data if lastEvent is null');
+    }
+    add(UpdateEvent(lastEvent as E, data));
+  }
 }
 
 extension GrpcStateExtension on GrpcState {

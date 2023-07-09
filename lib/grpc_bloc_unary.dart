@@ -18,25 +18,40 @@ export 'src/extensions.dart';
 abstract class GrpcUnaryBloc<E, T> extends GrpcBaseBloc<E, T> {
   GrpcUnaryBloc() {
     on<GrpcEvent<E>>((e, emit) async {
-      if (this.state.isLoading()) {
-        return;
-      }
-      final event = e.event;
+      if (e is UpdateEvent) {
+        if (state.isLoading()) {
+          return;
+        }
+        if (e.event != lastEvent) {
+          return;
+        }
+        var data = state.data;
+        final dataEvent = (e as UpdateEvent<dynamic, dynamic>).data;
+        if (dataEvent is T) {
+          data = dataEvent;
+        }
+        emit(state.copyWith(data: data));
+      } else {
+        if (this.state.isLoading()) {
+          return;
+        }
+        final event = e.event;
 
-      GrpcState<T> state =
-          this.state.copyWith(status: ConnectionStatus.loading);
-      if (e.refresh) {
-        state = GrpcState(connectionStatus: ConnectionStatus.loading);
-      }
-      emit(state);
-      try {
-        await Future.delayed(delayFetch);
-        final data = GrpcBlocHelper.isTestMode
-            ? await testData(event)
-            : await dataFromServer(event);
-        emit(state.copyWith(status: ConnectionStatus.finished, data: data));
-      } catch (e) {
-        emit(state.copyWith(status: ConnectionStatus.finished, error: e));
+        GrpcState<T> state =
+            this.state.copyWith(status: ConnectionStatus.loading);
+        if (e.refresh) {
+          state = GrpcState(connectionStatus: ConnectionStatus.loading);
+        }
+        emit(state);
+        try {
+          await Future.delayed(delayFetch);
+          final data = GrpcBlocHelper.isTestMode
+              ? await testData(event)
+              : await dataFromServer(event);
+          emit(state.copyWith(status: ConnectionStatus.finished, data: data));
+        } catch (e) {
+          emit(state.copyWith(status: ConnectionStatus.finished, error: e));
+        }
       }
     }, transformer: transformer);
   }
@@ -61,8 +76,11 @@ abstract class GrpcUnaryBloc<E, T> extends GrpcBaseBloc<E, T> {
 
   /// Add data to the current state
   Future<void> addData(T data) async {
-    await waitForAsync((s) => s.connectionStatus.isFinishedOrIdle());
-    emit(state.copyWith(data: data, status: ConnectionStatus.finished));
+    final event = lastEvent;
+    if (event == null) {
+      return;
+    }
+    add(UpdateEvent(event, data));
   }
 
   @protected
@@ -85,4 +103,41 @@ abstract class GrpcUnaryBloc<E, T> extends GrpcBaseBloc<E, T> {
   /// Need to be overriden by the child class, to return
   /// the data from the server
   Future<T> dataFromServer(E event);
+
+  @override
+  @visibleForTesting
+
+  /// do not use this method, use the defined methods ([fetch], [addData])
+  void add(GrpcEvent<E> event) {
+    super.add(event);
+  }
+}
+
+extension GrpcUnaryListBlocExtension<E, T> on GrpcUnaryBloc<E, List<T>> {
+  void updateData(T data, T newData, [bool addIfAbsent = false]) {
+    if (state.isFinished() || state.isIdle()) {
+      final list = List<T>.from(state.data ?? []);
+      final index = list.indexWhere((element) => element == data);
+      if (index == -1) {
+        if (addIfAbsent) {
+          list.add(newData);
+        } else {
+          return;
+        }
+      } else {
+        list[index] = newData;
+      }
+      addData(list);
+    }
+  }
+
+  void appendData(T data) {
+    if (lastEvent == null) {
+      return;
+    }
+
+    final list = state.data ?? [];
+    list.add(data);
+    add(UpdateEvent(lastEvent as E, list));
+  }
 }
