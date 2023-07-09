@@ -3,9 +3,10 @@ import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grpc_bloc_helper/src/grpc_state.dart';
+import 'package:grpc_bloc_helper/src/utils.dart';
 
 import '../grpc_bloc_helper.dart';
-import 'empty.dart';
+// import 'empty.dart';
 
 /// DO NOT USE THIS
 ///
@@ -16,10 +17,12 @@ class GrpcEvent<E> {
   final E event;
   final bool refresh;
 
+  static const GrpcEvent<void> empty = GrpcEvent<void>(null, false);
+
   const GrpcEvent(this.event, this.refresh);
 
   @override
-  String toString() => 'Unary Event: ${event.runtimeType} | Data: $event';
+  String toString() => event.toString();
 }
 
 /// Event to update the data
@@ -34,11 +37,7 @@ class UpdateEvent<E, T> extends GrpcEvent<E> {
 }
 
 abstract class GrpcBaseBloc<E, T> extends Bloc<GrpcEvent<E>, GrpcState<T>> {
-  GrpcBaseBloc() : super(GrpcState.init()) {
-    if (E == Empty) {
-      _event = Empty() as E;
-    }
-  }
+  GrpcBaseBloc() : super(GrpcState.init());
 
   /// Be careful when overriding this method, this could lead to unexpected
   /// behavior
@@ -77,7 +76,8 @@ abstract class GrpcBaseBloc<E, T> extends Bloc<GrpcEvent<E>, GrpcState<T>> {
     }
   }
 
-  E? get lastEvent => _event;
+  E? get lastEvent =>
+      _event ?? GrpcBlocHelper.globalEmptyMessageGenerator?.tryCast<E>();
 
   E? _event;
 
@@ -88,7 +88,7 @@ abstract class GrpcBaseBloc<E, T> extends Bloc<GrpcEvent<E>, GrpcState<T>> {
   }
 
   bool get isEventNull {
-    return _event == null;
+    return lastEvent == null;
   }
 
   /// [refresh] is used to refresh the data, if the last event is null, it will
@@ -96,7 +96,7 @@ abstract class GrpcBaseBloc<E, T> extends Bloc<GrpcEvent<E>, GrpcState<T>> {
   ///
   /// [flushData] is used to clear the previous data before fetching the new one
   void refresh([bool flushData = true]) {
-    fetch(_event as E, flushData);
+    fetch(lastEvent as E, flushData);
   }
 
   FutureOr<void> waitForAsync(bool Function(GrpcState<T>) predicate,

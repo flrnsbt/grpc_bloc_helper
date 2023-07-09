@@ -1,8 +1,7 @@
 import 'package:grpc_bloc_helper/grpc_bloc_stream.dart';
 import 'package:grpc_bloc_helper/grpc_bloc_unary.dart';
-import 'package:grpc_bloc_helper/protobuf_empty.dart';
 
-class PaginatedTestBloc extends GrpcListStreamBloc<Empty, int> {
+class PaginatedTestBloc extends GrpcListStreamBloc<void, int> {
   @override
   Stream<int?> dataFromServer(GrpcPaginatedEvent event) {
     final offset = event.offset;
@@ -19,19 +18,19 @@ class PaginatedTestBloc extends GrpcListStreamBloc<Empty, int> {
   int? get limit => 5;
 
   @override
-  Stream<int?> testValue(GrpcPaginatedEvent<Empty> event) {
+  Stream<int?> testValue(GrpcPaginatedEvent<void> event) {
     return dataFromServer(event);
   }
 }
 
-class NormalTestBloc extends GrpcUnaryBloc<Empty, List<int>> {
+class NormalTestBloc extends GrpcUnaryBloc<void, List<int>> {
   @override
-  Future<List<int>> dataFromServer(Empty event) {
+  Future<List<int>> dataFromServer(void event) {
     return Future.delayed(const Duration(milliseconds: 100), () => [1, 2, 3]);
   }
 
   @override
-  Future<List<int>> testData(Empty event) {
+  Future<List<int>> testData(void event) {
     super.testData(event);
     return dataFromServer(event);
   }

@@ -161,7 +161,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "0.0.7"
+    version: "0.0.8"
   http:
     dependency: transitive
     description:
@@ -251,7 +251,7 @@ packages:
     source: hosted
     version: "3.7.3"
   protobuf:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: protobuf
       sha256: "4034a02b7e231e7e60bff30a8ac13a7347abfdac0798595fae0b90a3f0afe759"

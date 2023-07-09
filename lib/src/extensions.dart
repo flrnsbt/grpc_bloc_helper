@@ -1,20 +1,6 @@
 import 'package:grpc/grpc.dart';
-import 'package:grpc_bloc_helper/src/grpc_bloc_base.dart';
 
-import 'connection_status.dart';
-import 'empty.dart';
-import 'grpc_state.dart';
-
-///
-/// Extensions
-///
-extension GrpcBlocExtension on GrpcBaseBloc<Empty, dynamic> {
-  /// method to fetch data when event is empty
-  /// Simplifies the code
-  void fetchNoParam() {
-    fetch(Empty());
-  }
-}
+import '../grpc_bloc_stream.dart';
 
 extension GrpcStateExtension<T> on GrpcState<T> {
   /// I'm using an extension to define copyWith instead of defining it in the class
@@ -42,5 +28,25 @@ extension GrpcStateExtension<T> on GrpcState<T> {
 extension GprcErrorExtension on GrpcError {
   String toBeautifulString() {
     return 'code: $code, message: $message, details: $details';
+  }
+}
+
+extension GrpcPaginatedExtension
+    on GrpcBaseBloc<GrpcPaginatedEvent<void>, dynamic> {
+  /// fetches data from the server starting from [offset]
+  /// for empty events, it will use the [GrpcBlocEmptyMixin.generateEmptyEvent] method
+  void fetchFrom(int offset) {
+    fetch(GrpcPaginatedEvent(offset, null));
+  }
+
+  /// fetches data from the server starting from offset 0
+  void fetchFromZero() {
+    fetchFrom(0);
+  }
+}
+
+extension GrpcBaseBlocExtension on GrpcBaseBloc<void, dynamic> {
+  void fetchNoParam() {
+    fetch(null);
   }
 }

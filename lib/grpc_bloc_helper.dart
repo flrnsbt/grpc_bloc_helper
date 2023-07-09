@@ -1,17 +1,43 @@
-abstract class GrpcBlocHelper {
-  static bool get isTestMode => _isTestMode;
+class GrpcBlocHelper<E> {
+  static bool get isTestMode => instance._isTestMode;
 
-  static bool _isTestMode = false;
+  final bool _isTestMode;
 
-  static void setTestMode() {
-    _isTestMode = true;
+  final bool _log;
+
+  static bool get logActivated => instance._log;
+
+  final EmptyMessageGenerator? _emptyGenerator;
+
+  static EmptyMessageGenerator? get globalEmptyMessageGenerator =>
+      instance._emptyGenerator;
+
+  static bool get initialized => _instance != null;
+
+  static GrpcBlocHelper? _instance;
+
+  static GrpcBlocHelper get instance {
+    // assert(initialized, 'GrpcBlocHelper is not initialized');
+    return _instance ??= const GrpcBlocHelper._();
   }
 
-  static bool _log = true;
+  static Type? get emptyType => instance._emptyGenerator?.call()?.runtimeType;
 
-  static bool get logActivated => _log;
+  const GrpcBlocHelper._(
+      {bool isTestMode = false,
+      bool log = true,
+      EmptyMessageGenerator<E>? emptyGenerator})
+      : _isTestMode = isTestMode,
+        _log = log,
+        _emptyGenerator = emptyGenerator;
 
-  static void deactivateLog() {
-    _log = false;
+  static void init<E>(
+      {bool testMode = false,
+      bool log = true,
+      EmptyMessageGenerator<E>? emptyGenerator}) {
+    _instance ??= GrpcBlocHelper<E>._(
+        isTestMode: testMode, log: log, emptyGenerator: emptyGenerator);
   }
 }
+
+typedef EmptyMessageGenerator<E> = E Function();

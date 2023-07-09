@@ -2,7 +2,6 @@
 
 import 'package:equatable/equatable.dart';
 import 'package:grpc_bloc_helper/grpc_bloc_stream.dart';
-import 'package:grpc_bloc_helper/src/grpc_bloc_base.dart';
 
 ///
 /// GRPC STATE

@@ -11,6 +11,7 @@ import 'src/grpc_state.dart';
 export 'src/connection_status.dart';
 export 'src/grpc_state.dart';
 export 'src/extensions.dart';
+export 'src/grpc_bloc_base.dart';
 
 /// [T] is the type of the data that will be returned
 ///

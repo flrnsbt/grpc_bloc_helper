@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:grpc_bloc_helper/src/empty.dart';
 import 'package:grpc_bloc_helper/src/extensions.dart';
 import 'package:grpc_bloc_helper/src/grpc_bloc_base.dart';
 
@@ -14,20 +13,7 @@ import 'src/grpc_state.dart';
 export 'src/connection_status.dart';
 export 'src/grpc_state.dart';
 export 'src/extensions.dart';
-// export 'src/empty.dart';
-
-extension GrpcPaginatedExtension
-    on GrpcBaseBloc<GrpcPaginatedEvent<Empty>, dynamic> {
-  /// fetches data from the server starting from [offset]
-  void fetchFrom(int offset) {
-    fetch(GrpcPaginatedEvent(offset, Empty()));
-  }
-
-  /// fetches data from the server starting from offset 0
-  void get() {
-    fetch(GrpcPaginatedEvent(0, Empty()));
-  }
-}
+export 'src/grpc_bloc_base.dart';
 
 ///
 /// STREAM GRPC

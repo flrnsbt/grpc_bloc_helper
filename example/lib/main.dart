@@ -5,8 +5,10 @@ import 'package:grpc_bloc_helper/grpc_bloc_helper.dart';
 import 'package:grpc_bloc_helper/grpc_bloc_stream.dart';
 import 'package:grpc_bloc_helper/grpc_bloc_unary.dart';
 
+import 'empty_message.dart';
+
 void main() {
-  GrpcBlocHelper.setTestMode();
+  GrpcBlocHelper.init(emptyGenerator: () => Empty());
   runApp(MultiBlocProvider(
     providers: [
       BlocProvider(
@@ -147,7 +149,7 @@ class ListStreamTest extends StatelessWidget {
         return Center(
             child: TextButton(
                 onPressed: () {
-                  context.read<PaginatedTestBloc>().get();
+                  context.read<PaginatedTestBloc>().fetchFromZero();
                 },
                 child: const Text('Get data')));
       }
