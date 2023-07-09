@@ -77,7 +77,7 @@ abstract class GrpcBaseBloc<E, T> extends Bloc<GrpcEvent<E>, GrpcState<T>> {
   }
 
   E? get lastEvent =>
-      _event ?? GrpcBlocHelper.globalEmptyMessageGenerator?.tryCast<E>();
+      _event ?? GrpcBlocHelper.globalEmptyMessageGenerator?.call().tryCast<E>();
 
   E? _event;
 
