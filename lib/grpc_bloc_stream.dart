@@ -33,8 +33,6 @@ extension GrpcPaginatedExtension
 /// STREAM GRPC
 ///
 
-const int kDefaultLimit = 20;
-
 /// [GrpcListStreamBloc] is a Bloc that returns a list of data of type [T]
 ///
 /// [T] is the type of the data that will be returned
@@ -46,11 +44,11 @@ abstract class GrpcListStreamBloc<E, T>
     extends GrpcStreamBloc<GrpcPaginatedEvent<E>, T, List<T>> {
   /// override if you wish to change the limit
   ///
-  /// default is [kDefaultLimit]
+  /// default is null
   ///
   /// if null, there is no limit
   @override
-  int? get limit => kDefaultLimit;
+  int? get limit;
 
   @protected
   @visibleForTesting
@@ -124,7 +122,7 @@ abstract class GrpcListStreamBloc<E, T>
           return;
         }
       }
-      addData(dataList);
+      reload();
     }
   }
 }
@@ -205,7 +203,7 @@ abstract class GrpcStreamBloc<E, K, T> extends GrpcBaseBloc<E, T> {
         }
         var data = state.data;
         final eventData = (e as UpdateEvent<dynamic, dynamic>).data;
-        if (eventData != null) {
+        if (eventData is K) {
           data = merge(data, eventData);
         }
         emit(state.copyWith(status: ConnectionStatus.finished, data: data));
@@ -265,7 +263,7 @@ abstract class GrpcStreamBloc<E, K, T> extends GrpcBaseBloc<E, T> {
     super.add(event);
   }
 
-  void addData(T data) {
+  void addData(K data) {
     if (lastEvent == null) {
       throw Exception('Cannot add data if lastEvent is null');
     }
