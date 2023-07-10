@@ -23,6 +23,7 @@ class GrpcState<T> extends Equatable {
       {this.connectionStatus = ConnectionStatus.idle,
       T? data,
       this.error,
+      this.extra,
       int? timestamp})
       : _data = data,
         timestamp = timestamp ?? _getTimestamp();
@@ -33,6 +34,7 @@ class GrpcState<T> extends Equatable {
   final T? _data;
   final Object? error;
   final int timestamp;
+  final Object? extra;
 
   T? get data => _data;
 
@@ -55,7 +57,7 @@ class GrpcState<T> extends Equatable {
   bool hasError() => error != null;
 
   @override
-  List<Object?> get props => [connectionStatus, _data, error, timestamp];
+  List<Object?> get props => [connectionStatus, _data, error, timestamp, extra];
 
   static int _getTimestamp() {
     return DateTime.now().millisecondsSinceEpoch;

@@ -16,10 +16,12 @@ extension GrpcStateExtension<T> on GrpcState<T> {
       T? data,
       Object? error,
       bool? skip,
+      Object? extra,
       bool forceStateChange = true}) {
     return GrpcState<T>(
         connectionStatus: status ?? connectionStatus,
         data: (data ?? this.data) as T?,
+        extra: extra,
         timestamp: forceStateChange ? null : timestamp,
         error: error ?? this.error);
   }
