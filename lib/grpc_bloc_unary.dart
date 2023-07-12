@@ -20,12 +20,6 @@ abstract class GrpcUnaryBloc<E, T> extends GrpcBaseBloc<E, T> {
   GrpcUnaryBloc() {
     on<GrpcEvent<E>>((e, emit) async {
       if (e is UpdateEvent) {
-        if (state.isLoading()) {
-          return;
-        }
-        if (e.event != lastEvent) {
-          return;
-        }
         var data = state.data;
         final dataEvent = (e as UpdateEvent<dynamic, dynamic>).data;
         if (dataEvent is T) {
@@ -77,11 +71,12 @@ abstract class GrpcUnaryBloc<E, T> extends GrpcBaseBloc<E, T> {
 
   /// Add data to the current state
   Future<void> addData(T data) async {
-    final event = lastEvent;
-    if (event == null) {
+    if (isEventNull) {
+      debugPrint('Last event is null');
+
       return;
     }
-    add(UpdateEvent(event, data));
+    add(UpdateEvent(lastEvent as E, data));
   }
 
   @protected
@@ -133,7 +128,8 @@ extension GrpcUnaryListBlocExtension<E, T> on GrpcUnaryBloc<E, List<T>> {
   }
 
   void appendData(T data) {
-    if (lastEvent == null) {
+    if (isEventNull) {
+      debugPrint('Last event is null');
       return;
     }
 
