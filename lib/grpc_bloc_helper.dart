@@ -14,8 +14,12 @@ class GrpcBlocHelper {
   static EmptyMessageGenerator? get globalEmptyMessageGenerator =>
       instance._emptyGenerator;
 
-  static E? emptyMessage<E>() =>
-      CastExtension(_instance?._emptyGenerator?.call()).tryCast<E>();
+  static E? emptyMessage<E>() {
+    if (_instance == null) {
+      throw Exception('GrpcBlocHelper is not initialized');
+    }
+    return CastExtension(_instance!._emptyGenerator?.call()).tryCast<E>();
+  }
 
   static bool get initialized => _instance != null;
 
