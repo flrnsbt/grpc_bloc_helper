@@ -23,7 +23,7 @@ abstract class GrpcUnaryBloc<E, T> extends GrpcBaseBloc<E, T> {
         if (state.isLoading()) {
           return;
         }
-        if (e.event != lastEvent) {
+        if (lastEvent == null && (e.event != lastEvent)) {
           return;
         }
         var data = state.data;
@@ -76,10 +76,10 @@ abstract class GrpcUnaryBloc<E, T> extends GrpcBaseBloc<E, T> {
   }
 
   /// Add data to the current state
-  Future<void> addData(T data) async {
-    final event = lastEvent;
+  Future<void> addData(T data, [E? event]) async {
+    event ??= lastEvent;
     if (event == null) {
-      return;
+      throw Exception('Event cannot be null');
     }
     add(UpdateEvent(event, data));
   }

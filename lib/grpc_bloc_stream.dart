@@ -184,7 +184,7 @@ abstract class GrpcStreamBloc<E, K, T> extends GrpcBaseBloc<E, T> {
         if (state.isLoading() || state.isActive()) {
           return;
         }
-        if (e.event != lastEvent) {
+        if (e.event != lastEvent && lastEvent != null) {
           return;
         }
         var data = state.data;
@@ -250,8 +250,12 @@ abstract class GrpcStreamBloc<E, K, T> extends GrpcBaseBloc<E, T> {
   }
 
   /// use this method to add data, if the last event is null, an exception will be thrown
-  void addData(K data) {
-    add(UpdateEvent(lastEvent as E, data));
+  void addData(K data, [E? event]) {
+    event ??= lastEvent;
+    if (event == null) {
+      throw Exception('last event is null');
+    }
+    add(UpdateEvent(event, data));
   }
 }
 
