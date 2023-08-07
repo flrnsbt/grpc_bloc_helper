@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grpc_bloc_helper/src/extensions.dart';
@@ -267,9 +268,12 @@ extension ConnectionStatusExtension on ConnectionStatus {
   bool isActive() => this == ConnectionStatus.active;
 }
 
-class GrpcPaginatedEvent<E> {
+class GrpcPaginatedEvent<E> extends Equatable {
   final int offset;
   final E event;
 
   const GrpcPaginatedEvent(this.offset, this.event);
+
+  @override
+  List<Object?> get props => [offset, event];
 }
