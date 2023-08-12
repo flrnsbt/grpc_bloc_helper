@@ -7,7 +7,14 @@ class GrpcBlocHelper {
 
   final bool _log;
 
+  /// if [stateAlwaysUpdate] is true, the state will always always be different
+  /// even if the data is the same, because the [timestamp] will be different
+  /// and therefore the UI will be rebuilt
+  final bool _stateAlwaysUpdate;
+
   static bool get logActivated => instance._log;
+
+  static bool get stateAlwaysUpdateActivated => instance._stateAlwaysUpdate;
 
   final EmptyMessageGenerator? _emptyGenerator;
 
@@ -32,18 +39,24 @@ class GrpcBlocHelper {
 
   const GrpcBlocHelper._(
       {bool isTestMode = false,
-      bool log = true,
+      bool stateAlwaysUpdate = false,
+      bool log = false,
       EmptyMessageGenerator? emptyGenerator})
       : _isTestMode = isTestMode,
         _log = log,
+        _stateAlwaysUpdate = stateAlwaysUpdate,
         _emptyGenerator = emptyGenerator;
 
   static void init<E>(
       {bool testMode = false,
-      bool log = true,
+      bool stateAlwaysUpdate = false,
+      bool log = false,
       EmptyMessageGenerator<E>? emptyGenerator}) {
     _instance ??= GrpcBlocHelper._(
-        isTestMode: testMode, log: log, emptyGenerator: emptyGenerator);
+        stateAlwaysUpdate: stateAlwaysUpdate,
+        isTestMode: testMode,
+        log: log,
+        emptyGenerator: emptyGenerator);
   }
 }
 

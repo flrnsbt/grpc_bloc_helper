@@ -1,6 +1,7 @@
-// ignore_for_file: must_be_immutable
-
+import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
+import 'package:grpc_bloc_helper/grpc_bloc_helper.dart';
 import 'package:grpc_bloc_helper/grpc_bloc_stream.dart';
 
 ///
@@ -19,45 +20,47 @@ class GrpcState<T> extends Equatable {
     _bloc = bloc;
   }
 
+  final _GRPCData<T>? _grpcData;
+
+  T? get data => _grpcData?.data;
+
+  int? get datahash => _grpcData?.hashCode;
+
+  bool hasData() => _grpcData?.hasData() ?? false;
+
   GrpcState(
       {this.connectionStatus = ConnectionStatus.idle,
       T? data,
       this.error,
       this.extra,
       int? timestamp})
-      : _data = data,
+      : _grpcData = _GRPCData<T>(data),
         timestamp = timestamp ?? _getTimestamp();
 
   factory GrpcState.init() => GrpcState();
 
   final ConnectionStatus connectionStatus;
-  final T? _data;
   final Object? error;
   final int timestamp;
   final Object? extra;
 
-  T? get data => _data;
-
   bool isLoading() => connectionStatus.isLoading();
   bool isFinished() => connectionStatus.isFinished();
   bool isIdle() => connectionStatus.isIdle();
-
-  bool hasData() {
-    if (_data == null) {
-      return false;
-    }
-    if (_data is List) {
-      return (_data as List).isNotEmpty;
-    }
-    return _data != null;
-  }
 
   DateTime? get lastUpdated => DateTime.fromMillisecondsSinceEpoch(timestamp);
 
   bool hasError() => error != null;
 
   @override
-  List<Object?> get props => [connectionStatus, _data, error, timestamp, extra];
+  @mustCallSuper
+  List<Object?> get props => [
+        connectionStatus,
+        _grpcData,
+        error,
+        if (GrpcBlocHelper.stateAlwaysUpdateActivated) timestamp,
+        extra
+      ];
 
   static int _getTimestamp() {
     return DateTime.now().millisecondsSinceEpoch;
@@ -96,4 +99,30 @@ extension GrpcStateListExtension<T> on GrpcState<List<T>> {
 
 void attachBloc<E, T>(GrpcState<T> grpcState, GrpcBaseBloc<E, T> bloc) {
   grpcState._attachBloc(bloc);
+}
+
+class _GRPCData<T> {
+  final T? data;
+
+  const _GRPCData(this.data);
+
+  bool hasData() {
+    if (data == null) {
+      return false;
+    }
+    if (data is Iterable) {
+      return (data as Iterable).isNotEmpty;
+    }
+    return data != null;
+  }
+
+  @override
+  int get hashCode {
+    return const DeepCollectionEquality().hash(data);
+  }
+
+  @override
+  bool operator ==(covariant _GRPCData<T> other) {
+    return const DeepCollectionEquality().equals(data, other.data);
+  }
 }
