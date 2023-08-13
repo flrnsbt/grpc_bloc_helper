@@ -13,6 +13,9 @@ import 'package:grpc_bloc_helper/grpc_bloc_stream.dart';
 /// [error] is the error returned by the grpc call
 /// [timestamp] is the time the state was created
 /// [connectionStatus] is the status of the grpc call
+///
+
+// ignore: must_be_immutable
 class GrpcState<T> extends Equatable {
   GrpcBaseBloc<dynamic, T>? _bloc;
 
