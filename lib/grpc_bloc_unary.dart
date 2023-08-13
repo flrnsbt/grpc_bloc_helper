@@ -132,6 +132,20 @@ extension GrpcUnaryListBlocExtension<E, T> on GrpcUnaryBloc<E, List<T>> {
     }
   }
 
+  void upsertData(T data) {
+    if (lastEvent == null) {
+      return;
+    }
+    final list = state.data ?? [];
+    final index = list.indexWhere((element) => element == data);
+    if (index == -1) {
+      list.add(data);
+    } else {
+      list[index] = data;
+    }
+    add(UpdateEvent(lastEvent as E, list));
+  }
+
   void appendData(T data) {
     if (lastEvent == null) {
       return;
