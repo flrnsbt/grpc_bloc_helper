@@ -1,21 +1,28 @@
 import 'dart:async';
 import 'dart:developer';
+import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grpc_bloc_helper/src/grpc_state.dart';
 
 import '../grpc_bloc_helper.dart';
-// import 'empty.dart';
+
+abstract class GrpcEvent<E> extends Equatable {
+  final E event;
+
+  const GrpcEvent(this.event);
+  @override
+  List<Object?> get props => [event];
+}
 
 /// DO NOT USE THIS
 ///
 /// Internal event
 ///
 /// [E] is the type of the event
-class GrpcEvent<E> {
-  final E event;
+class RefreshGrpcEvent<E> extends GrpcEvent<E> {
   final bool refresh;
 
-  const GrpcEvent(this.event, this.refresh);
+  const RefreshGrpcEvent(super.event, this.refresh);
 
   @override
   String toString() => event.toString();
@@ -25,11 +32,12 @@ class GrpcEvent<E> {
 class UpdateEvent<E, T> extends GrpcEvent<E> {
   /// Data to update
   ///
-  /// This is optional
-  ///
-  /// If this is null, trigger a [reload]
-  final T? data;
-  const UpdateEvent(E event, [this.data]) : super(event, false);
+  final T data;
+  const UpdateEvent(E event, this.data) : super(event);
+}
+
+class ReloadEvent<E> extends GrpcEvent<E> {
+  const ReloadEvent(E event) : super(event);
 }
 
 abstract class GrpcBaseBloc<E, T> extends Bloc<GrpcEvent<E>, GrpcState<T>> {
@@ -59,7 +67,7 @@ abstract class GrpcBaseBloc<E, T> extends Bloc<GrpcEvent<E>, GrpcState<T>> {
   /// timestamp
   void reload() {
     if (lastEvent != null) {
-      add(UpdateEvent(lastEvent as E));
+      add(ReloadEvent(lastEvent as E));
     }
   }
 
@@ -125,6 +133,6 @@ abstract class GrpcBaseBloc<E, T> extends Bloc<GrpcEvent<E>, GrpcState<T>> {
   ///
 
   void fetch(E event, [bool refresh = false]) {
-    add(GrpcEvent(event, refresh));
+    add(RefreshGrpcEvent(event, refresh));
   }
 }

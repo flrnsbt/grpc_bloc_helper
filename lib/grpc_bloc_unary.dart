@@ -18,41 +18,41 @@ export 'src/grpc_bloc_base.dart';
 /// [E] is the type of the event that will be sent to the grpc server
 abstract class GrpcUnaryBloc<E, T> extends GrpcBaseBloc<E, T> {
   GrpcUnaryBloc() {
-    on<GrpcEvent<E>>((e, emit) async {
-      if (e is UpdateEvent) {
-        if (state.isLoading()) {
-          return;
-        }
-        if (lastEvent == null && (e.event != lastEvent)) {
-          return;
-        }
-        var data = state.data;
-        final dataEvent = (e as UpdateEvent<dynamic, dynamic>).data;
-        if (dataEvent is T) {
-          data = dataEvent;
-        }
-        emit(state.copyWith(data: data));
-      } else {
-        if (this.state.isLoading()) {
-          return;
-        }
-        final event = e.event;
+    on<ReloadEvent<E>>((e, emit) {
+      if (state.isLoading()) {
+        return;
+      }
+      emit(state.copyWith());
+    }, transformer: droppable());
 
-        GrpcState<T> state =
-            this.state.copyWith(status: ConnectionStatus.loading);
-        if (e.refresh) {
-          state = GrpcState(connectionStatus: ConnectionStatus.loading);
-        }
-        emit(state);
-        try {
-          await Future.delayed(delayFetch);
-          final data = GrpcBlocHelper.isTestMode
-              ? await testData(event)
-              : await dataFromServer(event);
-          emit(state.copyWith(status: ConnectionStatus.finished, data: data));
-        } catch (e) {
-          emit(state.copyWith(status: ConnectionStatus.finished, error: e));
-        }
+    on<UpdateEvent<E, T>>((e, emit) {
+      if (state.isLoading()) {
+        return;
+      }
+      if (lastEvent == null && (e.event != lastEvent)) {
+        return;
+      }
+      final data = e.data;
+
+      emit(state.copyWith(data: data));
+    }, transformer: sequential());
+    on<RefreshGrpcEvent<E>>((e, emit) async {
+      final event = e.event;
+
+      GrpcState<T> state =
+          this.state.copyWith(status: ConnectionStatus.loading);
+      if (e.refresh) {
+        state = GrpcState(connectionStatus: ConnectionStatus.loading);
+      }
+      emit(state);
+      try {
+        await Future.delayed(delayFetch);
+        final data = GrpcBlocHelper.isTestMode
+            ? await testData(event)
+            : await dataFromServer(event);
+        emit(state.copyWith(status: ConnectionStatus.finished, data: data));
+      } catch (e) {
+        emit(state.copyWith(status: ConnectionStatus.finished, error: e));
       }
     }, transformer: transformer);
   }
@@ -62,8 +62,8 @@ abstract class GrpcUnaryBloc<E, T> extends GrpcBaseBloc<E, T> {
   /// OVERRIDE THIS IF YOU WISHES TO CHANGE THE WAY EVENTS ARE QUEUED
   ///
   /// by default, events are queued in a FIFO manner
-  Stream<GrpcEvent<E>> Function(
-          Stream<GrpcEvent<E>>, Stream<GrpcEvent<E>> Function(GrpcEvent<E>))
+  Stream<RefreshGrpcEvent<E>> Function(Stream<RefreshGrpcEvent<E>>,
+          Stream<RefreshGrpcEvent<E>> Function(RefreshGrpcEvent<E>))
       get transformer => droppable();
 
   @override

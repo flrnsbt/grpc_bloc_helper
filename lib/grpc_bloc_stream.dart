@@ -180,33 +180,38 @@ abstract class GrpcStreamBloc<E, K, T> extends GrpcBaseBloc<E, T> {
   }
 
   GrpcStreamBloc() {
-    on<GrpcEvent<E>>((e, emit) async {
-      if (e is UpdateEvent) {
-        if (state.isLoading() || state.isActive()) {
-          return;
-        }
-        if (e.event != lastEvent && lastEvent != null) {
-          return;
-        }
-        var data = state.data;
-        final eventData = (e as UpdateEvent<dynamic, dynamic>).data;
-        if (eventData is K) {
-          data = merge(data, eventData);
-        }
-        emit(state.copyWith(status: ConnectionStatus.finished, data: data));
-      } else {
-        /// _fetch async method is finished when the stream is done or an error is thrown
-        /// meaning that the connection status is not in loading or active state anymore
-        await _fetch(e.event, e.refresh, emit);
+    on<ReloadEvent<E>>((event, emit) {
+      if (state.isLoading() || state.isActive()) {
+        return;
       }
+      emit(state.copyWith());
+    }, transformer: droppable());
+    on<UpdateEvent<E, T>>((e, emit) {
+      if (state.isLoading() || state.isActive()) {
+        return;
+      }
+      if (e.event != lastEvent && lastEvent != null) {
+        return;
+      }
+      var data = state.data;
+      final eventData = e.data;
+      if (eventData is K) {
+        data = merge(data, eventData);
+      }
+      emit(state.copyWith(status: ConnectionStatus.finished, data: data));
+    }, transformer: sequential());
+    on<RefreshGrpcEvent<E>>((e, emit) async {
+      /// _fetch async method is finished when the stream is done or an error is thrown
+      /// meaning that the connection status is not in loading or active state anymore
+      await _fetch(e.event, e.refresh, emit);
     }, transformer: transformer);
   }
 
   /// OVERRIDE THIS IF YOU WISH TO CHANGE THE WAY EVENTS ARE QUEUED (not recommended)
   ///
   /// by default events are queued sequentially
-  Stream<GrpcEvent<E>> Function(
-          Stream<GrpcEvent<E>>, Stream<GrpcEvent<E>> Function(GrpcEvent<E>))
+  Stream<RefreshGrpcEvent<E>> Function(Stream<RefreshGrpcEvent<E>>,
+          Stream<RefreshGrpcEvent<E>> Function(RefreshGrpcEvent<E>))
       get transformer => sequential();
 
   StreamSubscription<K?>? _subscription;
