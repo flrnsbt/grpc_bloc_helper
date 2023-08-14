@@ -29,7 +29,7 @@ abstract class GrpcUnaryBloc<E, T> extends GrpcBaseBloc<E, T> {
       if (state.isLoading()) {
         return;
       }
-      if (lastEvent == null && (e.event != lastEvent)) {
+      if (e.event != lastEvent) {
         return;
       }
       final data = e.data;
@@ -116,6 +116,9 @@ abstract class GrpcUnaryBloc<E, T> extends GrpcBaseBloc<E, T> {
 
 extension GrpcUnaryListBlocExtension<E, T> on GrpcUnaryBloc<E, List<T>> {
   void updateData(T data, T newData, [bool addIfAbsent = false]) {
+    if (lastEvent == null) {
+      return;
+    }
     if (state.isFinished() || state.isIdle()) {
       final list = List<T>.from(state.data ?? []);
       final index = list.indexWhere((element) => element == data);
