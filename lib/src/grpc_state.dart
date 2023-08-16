@@ -65,6 +65,18 @@ class GrpcState<T> extends Equatable {
         extra
       ];
 
+  @override
+  String toString() {
+    return 'GrpcState{connectionStatus: $connectionStatus, data: $data, error: $error, timestamp: $timestamp, extra: $extra}';
+  }
+
+  String summary() {
+    if (connectionStatus.isFinished()) {
+      return 'Success: ${error != null}, data: ${data?.toString().substring(0, 20)}, extra: $extra}';
+    }
+    return connectionStatus.toString();
+  }
+
   static int _getTimestamp() {
     return DateTime.now().millisecondsSinceEpoch;
   }
