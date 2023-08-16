@@ -120,6 +120,14 @@ class _GRPCData<T> {
   }
 
   @override
+  String toString() {
+    if (data == null) {
+      return '';
+    }
+    return data.toString();
+  }
+
+  @override
   int get hashCode {
     return const DeepCollectionEquality().hash(data);
   }
