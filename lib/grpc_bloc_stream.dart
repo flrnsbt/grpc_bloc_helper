@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
@@ -29,6 +30,27 @@ export 'src/grpc_bloc_base.dart';
 /// [E] is the type of the event that will be sent to the grpc server
 abstract class GrpcListStreamBloc<E, T>
     extends GrpcStreamBloc<GrpcPaginatedEvent<E>, T, List<T>> {
+  GrpcListStreamBloc() {
+    on<UpdateEvent<GrpcPaginatedEvent<E>, T>>((e, emit) {
+      if (state.isLoading() || state.isActive()) {
+        return;
+      }
+      if (e.event != lastEvent) {
+        if (GrpcBlocHelper.logActivated) {
+          log('Refreshing since event is not the same as last event',
+              name: '$runtimeType', time: DateTime.now());
+        }
+        emit(GrpcState(connectionStatus: ConnectionStatus.loading));
+      }
+      var data = state.data;
+      final eventData = e.data;
+      if (eventData is E) {
+        data = merge(data, eventData);
+      }
+      emit(state.copyWith(status: ConnectionStatus.finished, data: data));
+    }, transformer: sequential());
+  }
+
   /// override if you wish to change the limit
   ///
   /// default is null
@@ -190,8 +212,12 @@ abstract class GrpcStreamBloc<E, K, T> extends GrpcBaseBloc<E, T> {
       if (state.isLoading() || state.isActive()) {
         return;
       }
-      if (e.event != lastEvent && lastEvent != null) {
-        return;
+      if (e.event != lastEvent) {
+        if (GrpcBlocHelper.logActivated) {
+          log('Refreshing since event is not the same as last event',
+              name: '$runtimeType', time: DateTime.now());
+        }
+        emit(GrpcState(connectionStatus: ConnectionStatus.loading));
       }
       var data = state.data;
       final eventData = e.data;
