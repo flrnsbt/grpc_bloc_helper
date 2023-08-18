@@ -156,19 +156,17 @@ extension _StreamExtension<T> on Stream<T> {
 abstract class GrpcStreamBloc<E, K, T> extends GrpcBaseBloc<E, T> {
   int? get limit => null;
 
-  Completer<void>? _completer;
   FutureOr<void> _fetch(
     E event,
     bool refresh,
     Emitter<GrpcState<T>> emit,
   ) async {
-    _subscription?.cancel();
+    await _subscription?.cancel();
     if (refresh) {
       emit(GrpcState(connectionStatus: ConnectionStatus.loading));
     } else {
       emit(state.copyWith(status: ConnectionStatus.loading));
     }
-    _completer = Completer();
     try {
       final stream =
           (GrpcBlocHelper.isTestMode ? testValue(event) : dataFromServer(event))
@@ -182,19 +180,8 @@ abstract class GrpcStreamBloc<E, K, T> extends GrpcBaseBloc<E, T> {
           }
           emit(state.copyWith(status: ConnectionStatus.active, data: data));
         },
-        cancelOnError: true,
-        onError: (e) {
-          if (!_completer!.isCompleted) {
-            _completer!.completeError(e);
-          }
-        },
-        onDone: () {
-          if (!_completer!.isCompleted) {
-            _completer!.complete();
-          }
-        },
       );
-      await _completer!.future;
+      await _subscription!.asFuture();
       emit(state.copyWith(status: ConnectionStatus.finished, data: data));
     } catch (e) {
       emit(state.copyWith(status: ConnectionStatus.finished, error: e));

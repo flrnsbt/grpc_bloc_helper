@@ -72,7 +72,7 @@ class GrpcState<T> extends Equatable {
 
   String summary() {
     if (connectionStatus.isFinished()) {
-      return 'Status ${error == null ? 'Success' : 'Failed'}, data: $data, extra: $extra}';
+      return '${error == null ? 'Success' : 'Failed'}, ${hasError() ? 'error: $error' : ''}, hasData: ${hasData()}, extra: $extra}';
     }
     return connectionStatus.toString();
   }
