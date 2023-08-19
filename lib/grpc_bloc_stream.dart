@@ -131,7 +131,7 @@ abstract class GrpcListStreamBloc<E, T>
           return;
         }
       }
-      reload();
+      emit(state.copyWith(data: dataList));
     }
   }
 }
