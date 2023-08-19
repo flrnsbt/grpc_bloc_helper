@@ -1,6 +1,6 @@
 name: grpc_bloc_helper
 description: Flutter package to help managing gRPC calls with bloc pattern
-version: 0.1.5
+version: 0.1.6
 homepage: https://github.com/flrnsbt/grpc_bloc_helper
 
 environment:

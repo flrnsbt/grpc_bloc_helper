@@ -7,9 +7,8 @@ import 'grpc_bloc_helper.dart';
 import 'src/connection_status.dart';
 import 'src/grpc_state.dart';
 
-// export 'src/empty.dart';
 export 'src/connection_status.dart';
-export 'src/grpc_state.dart';
+export 'src/grpc_state.dart' hide GrpcReloadStateExtension;
 export 'src/extensions.dart';
 export 'src/grpc_bloc_base.dart';
 
@@ -22,7 +21,7 @@ abstract class GrpcUnaryBloc<E, T> extends GrpcBaseBloc<E, T> {
       if (state.isLoading()) {
         return;
       }
-      emit(state._reloadWith(generation: state.generation + 1));
+      emit(state.reloadWith(generation: state.generation + 1));
     }, transformer: droppable());
 
     on<UpdateEvent<E, T>>((e, emit) {

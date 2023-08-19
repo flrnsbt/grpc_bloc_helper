@@ -4,8 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:grpc_bloc_helper/grpc_bloc_helper.dart';
 import 'package:grpc_bloc_helper/grpc_bloc_stream.dart';
 
-part 'reload_grpc_state_extensions.dart';
-
 ///
 /// GRPC STATE
 ///
@@ -24,6 +22,8 @@ class GrpcState<T> extends Equatable {
   void _attachBloc(GrpcBaseBloc<dynamic, T> bloc) {
     _bloc = bloc;
   }
+
+  int get generation => _generation ?? 0;
 
   final _GRPCData<T>? _grpcData;
 
@@ -165,4 +165,24 @@ class _GRPCData<T> {
   bool operator ==(covariant _GRPCData<T> other) {
     return const DeepCollectionEquality().equals(data, other.data);
   }
+}
+
+extension GrpcReloadStateExtension<T> on GrpcState<T> {
+  // ignore: avoid_shadowing_type_parameters, unused_element
+  GrpcState<T> reloadWith<T>(
+      {ConnectionStatus? status,
+      T? data,
+      Object? error,
+      bool? skip,
+      int? generation,
+      Object? extra}) {
+    return GrpcState<T>._(
+        connectionStatus: status ?? connectionStatus,
+        data: (data ?? this.data) as T?,
+        extra: extra,
+        generation: generation ?? this.generation,
+        error: error ?? this.error);
+  }
+
+  int get generation => _generation ?? 0;
 }
