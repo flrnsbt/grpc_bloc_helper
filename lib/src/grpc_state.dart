@@ -47,19 +47,14 @@ class GrpcState<T> extends Equatable {
         _generation = generation,
         timestamp = timestamp ?? _getTimestamp();
 
-  factory GrpcState(
-      {ConnectionStatus? connectionStatus,
+  GrpcState(
+      {this.connectionStatus = ConnectionStatus.idle,
       T? data,
-      Object? error,
-      int? timestamp,
-      Object? extra}) {
-    return GrpcState._(
-        connectionStatus: connectionStatus ?? ConnectionStatus.idle,
-        data: data,
-        timestamp: timestamp,
-        error: error,
-        extra: extra);
-  }
+      this.error,
+      this.extra,
+      int? timestamp})
+      : _grpcData = _GRPCData<T>(data),
+        timestamp = timestamp ?? _getTimestamp();
 
   factory GrpcState.init() => GrpcState._();
 
