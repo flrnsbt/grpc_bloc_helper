@@ -193,7 +193,7 @@ abstract class GrpcStreamBloc<E, K, T> extends GrpcBaseBloc<E, T> {
       if (state.isLoading() || state.isActive()) {
         return;
       }
-      emit(state.copyWith());
+      emit(state._reloadWith(generation: state.generation + 1));
     }, transformer: droppable());
     on<UpdateEvent<E, T>>((e, emit) {
       if (state.isLoading() || state.isActive()) {

@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:grpc_bloc_helper/grpc_bloc_helper.dart';
 import 'package:grpc_bloc_helper/grpc_bloc_stream.dart';
 
+part 'reload_grpc_state_extensions.dart';
+
 ///
 /// GRPC STATE
 ///
@@ -31,16 +33,35 @@ class GrpcState<T> extends Equatable {
 
   bool hasData() => _grpcData?.hasData() ?? false;
 
-  GrpcState(
+  /// used for reload events
+  int? _generation;
+
+  GrpcState._(
       {this.connectionStatus = ConnectionStatus.idle,
       T? data,
       this.error,
+      int? generation,
       this.extra,
       int? timestamp})
       : _grpcData = _GRPCData<T>(data),
+        _generation = generation,
         timestamp = timestamp ?? _getTimestamp();
 
-  factory GrpcState.init() => GrpcState();
+  factory GrpcState(
+      {ConnectionStatus? connectionStatus,
+      T? data,
+      Object? error,
+      int? timestamp,
+      Object? extra}) {
+    return GrpcState._(
+        connectionStatus: connectionStatus ?? ConnectionStatus.idle,
+        data: data,
+        timestamp: timestamp,
+        error: error,
+        extra: extra);
+  }
+
+  factory GrpcState.init() => GrpcState._();
 
   final ConnectionStatus connectionStatus;
   final Object? error;
@@ -60,6 +81,7 @@ class GrpcState<T> extends Equatable {
   List<Object?> get props => [
         connectionStatus,
         _grpcData,
+        _generation,
         error,
         if (GrpcBlocHelper.stateAlwaysUpdateActivated) timestamp,
         extra

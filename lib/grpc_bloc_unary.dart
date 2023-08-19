@@ -22,7 +22,7 @@ abstract class GrpcUnaryBloc<E, T> extends GrpcBaseBloc<E, T> {
       if (state.isLoading()) {
         return;
       }
-      emit(state.copyWith());
+      emit(state._reloadWith(generation: state.generation + 1));
     }, transformer: droppable());
 
     on<UpdateEvent<E, T>>((e, emit) {
