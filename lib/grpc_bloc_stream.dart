@@ -195,7 +195,7 @@ abstract class GrpcStreamBloc<E, K, T> extends GrpcBaseBloc<E, T> {
       }
       emit(state.reloadWith(generation: state.generation + 1));
     }, transformer: droppable());
-    on<UpdateEvent<E, T>>((e, emit) {
+    on<UpdateEvent<E, K>>((e, emit) {
       if (state.isLoading() || state.isActive()) {
         return;
       }
@@ -207,10 +207,8 @@ abstract class GrpcStreamBloc<E, K, T> extends GrpcBaseBloc<E, T> {
         emit(GrpcState(connectionStatus: ConnectionStatus.loading));
       }
       var data = state.data;
-      final eventData = e.data;
-      if (eventData is K) {
-        data = merge(data, eventData);
-      }
+      data = merge(data, e.data);
+
       emit(state.copyWith(status: ConnectionStatus.finished, data: data));
     }, transformer: sequential());
     on<RefreshGrpcEvent<E>>((e, emit) async {
