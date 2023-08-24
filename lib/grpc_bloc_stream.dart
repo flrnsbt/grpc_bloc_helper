@@ -31,24 +31,24 @@ export 'src/grpc_bloc_base.dart';
 abstract class GrpcListStreamBloc<E, T>
     extends GrpcStreamBloc<GrpcPaginatedEvent<E>, T, List<T>> {
   GrpcListStreamBloc() {
-    on<UpdateEvent<GrpcPaginatedEvent<E>, T>>((e, emit) {
-      if (state.isLoading() || state.isActive()) {
-        return;
-      }
-      if (e.event != lastEvent) {
-        if (GrpcBlocHelper.logActivated) {
-          log('Refreshing since event is not the same as last event',
-              name: '$runtimeType', time: DateTime.now());
-        }
-        emit(GrpcState(connectionStatus: ConnectionStatus.loading));
-      }
-      var data = state.data;
-      final eventData = e.data;
-      if (eventData is E) {
-        data = merge(data, eventData);
-      }
-      emit(state.copyWith(status: ConnectionStatus.finished, data: data));
-    }, transformer: sequential());
+    // on<UpdateEvent<GrpcPaginatedEvent<E>, T>>((e, emit) {
+    //   if (state.isLoading() || state.isActive()) {
+    //     return;
+    //   }
+    //   if (e.event != lastEvent) {
+    //     if (GrpcBlocHelper.logActivated) {
+    //       log('Refreshing since event is not the same as last event',
+    //           name: '$runtimeType', time: DateTime.now());
+    //     }
+    //     emit(GrpcState(connectionStatus: ConnectionStatus.loading));
+    //   }
+    //   var data = state.data;
+    //   final eventData = e.data;
+    //   if (eventData is E) {
+    //     data = merge(data, eventData);
+    //   }
+    //   emit(state.copyWith(status: ConnectionStatus.finished, data: data));
+    // }, transformer: sequential());
   }
 
   /// override if you wish to change the limit
